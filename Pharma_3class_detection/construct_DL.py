@@ -59,14 +59,15 @@ def first_derivative(X,Y):
     return dx, dy
 
 def standardize(spectrum, wave, start_index, end_index, window_length=11):
-    # Truncate ROI
+    
+    # Truncate Region of Interest
     norm_spectrum = spectrum[start_index: end_index + 1]
     wave = np.asarray(wave[start_index: end_index + 1])
 
-    # Remove high-frequency noise
+    # Remove high-frequency noise using Savtizky-Golay method
     norm_spectrum = savgol_filter(x=norm_spectrum, window_length=window_length, polyorder=2, mode='nearest')
 
-    # Remove background noise
+    # Remove background noise using first derivative method
     wave, norm_spectrum = first_derivative(wave, norm_spectrum)
     norm_spectrum= np.asarray(norm_spectrum)
     norm_spectrum = norm_spectrum *100
