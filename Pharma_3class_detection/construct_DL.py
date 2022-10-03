@@ -19,6 +19,7 @@ from matplotlib import cm
 from sklearn.utils import shuffle
 from sklearn.metrics import roc_curve, auc
 import re
+from sklearn.model_selection import GridSearchCV
 
 class CustomCallback(keras.callbacks.Callback):
     def on_epoch_end(self, epoch, logs=None):
@@ -218,17 +219,21 @@ class DL_analysis:
         model = self.ResNetv(input_shape=(size, 1), classes= num_class)
         optimizer = tf.optimizers.Adam(lr=1e-4)
         model.compile(loss=loss, optimizer=optimizer, metrics=["accuracy"])
+        
+        batch_size = [10, 20, 40, 60, 80, 100]
+        epochs = [10, 50, 100]
+        param_grid = dict(batch_size=batch_size, epochs=epochs)
+        grid = GridSearchCV(estimator=model, param_grid=param_grid, n_jobs=-1, cv=3)
 
         callbacks = CustomCallback()
         model_checkpoint = ModelCheckpoint(dir+datadir+ 'Model_wine\\ResNetbest' + str(i) + '.hdf5',verbose=1,
                                            save_best_only=True)
-        history = model.fit(X, Y, epochs=500, batch_size=40,  validation_split=0.2, verbose=2,
-                            callbacks=[callbacks, model_checkpoint])
+        history = grid.fit(X, Y, validation_split=0.2,callbacks=[callbacks, model_checkpoint])
 
-        score = model.evaluate(val_x, val_y)[1]
+        score = grid.best_estimator_.evaluate(val_x, val_y)[1]
         print("Val Score : " + str(i) + "fold", score)
-        model.save(dir+datadir+  "Model_wine\\ResNet_" + str(i) + "fold.hdf5")
-        model.save_weights(dir+datadir+ "Model_wine\\Resnet_base_weights" + str(i) + ".hdf5")
+        grid.best_estimator_.save(dir+datadir+  "Model_wine\\ResNet_" + str(i) + "fold.hdf5")
+        grid.best_estimator_.save_weights(dir+datadir+ "Model_wine\\Resnet_base_weights" + str(i) + ".hdf5")
         performance = pd.DataFrame(history.history['accuracy'])
         performance['Val_accuracy'] = history.history['val_accuracy']
         performance['Train_loss'] = history.history['loss']
