@@ -104,6 +104,6 @@ discriminator = define_discriminator()
 generator = define_generator(100)
 gan_model = define_gan(generator, discriminator)
 latent_dim = 100
-train(generator, discriminator, gan_model, X_train, latent_dim, n_epochs=20, n_batch=64)
+train(generator, discriminator, gan_model, X_train, latent_dim, n_epochs=1000, n_batch=32)
 
 
