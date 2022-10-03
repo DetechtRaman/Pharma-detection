@@ -280,7 +280,7 @@ class DL_analysis:
             score = self.createResNETmodel(i, X_train, X_test, y_train, y_test, num_class)
             score_list.append(score)
             i += 1
-            break
+            # break
         print("Mean Accuracy= {:f}%".format(np.mean(score_list) * 100))
 
     def verify_feature_extraction(self, modelfname, X, Y):
